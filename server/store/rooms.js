@@ -9,7 +9,6 @@ const DEFAULT_LIVES = 6;
 const rooms = {};
 
 // ! Create a new player object with initial values.
-
 function createPlayer(name, socketId) {
   return {
     id: crypto.randomUUID(),
@@ -93,7 +92,7 @@ function startGame({ code, word }) {
   const room = rooms[code];
   if (!room) return;
 
-  room.word = word.toUpperCase().trim(); 
+  room.word = word.toUpperCase().trim();
   room.status = "playing";
   room.winner = null;
 
@@ -120,7 +119,7 @@ function placeGuess({ code, playerId, letter }) {
 
   const guess = letter.toUpperCase();
 
-  // Tolak huruf yang udah pernah ditebak (biar gak double).
+  // ! Reject letters that have already been guessed (to avoid duplicates).
   if (player.guessedLetters.includes(guess)) {
     return { error: "Letter already guessed" };
   }
@@ -172,6 +171,32 @@ function finishGame(room) {
   return room;
 }
 
+// ! Convert the room state to a safe version for sending to the client.
+// ! Words are masked per player; the actual words are not included (unless the game has ended).
+function serializeRoom(room) {
+  return {
+    code: room.code,
+    status: room.status,
+    category: room.category,
+    difficulty: room.difficulty,
+    hostId: room.hostId,
+    players: Object.values(room.players).map((p) => ({
+      id: p.id,
+      name: p.name,
+      connected: p.connected,
+      ready: p.ready,
+      lives: p.lives,
+      score: p.score,
+      finished: p.finished,
+      // ! maskedWord: This player's progress. If they haven't played yet, it's empty.
+      maskedWord: room.word
+        ? gameLogic.maskWord(room.word, p.guessedLetters)
+        : null,
+      // ! guessedLetters is NOT sent — so the opponent can't cheat.
+    })),
+    winner: room.winner,
+  };
+}
 
 module.exports = {
   rooms, // ! => nanti socket handler butuh akses langsung ke object ini. Semua manipulasi state lewat fungsi-fungsi di sini biar terpusat.
@@ -185,4 +210,5 @@ module.exports = {
   isGameOver,
   getWinner,
   finishGame,
+  serializeRoom,
 };
