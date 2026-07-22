@@ -1,3 +1,5 @@
+const { generateWord } = require("../controllers/aiController");
+
 const {
   createRoom,
   joinRoom,
@@ -8,8 +10,6 @@ const {
   serializeRoom,
 } = require("../store/rooms");
 
-// ! Placeholder text—to be replaced later with AI-generated content.
-const TEMP_WORD = "REACT";
 
 function registerRoomHandler(io, socket) {
   // Host bikin room baru.
@@ -42,7 +42,7 @@ function registerRoomHandler(io, socket) {
   });
 
   // ! The player marks themselves as ready.
-  socket.on("player:ready", ({ code, playerId }) => {
+  socket.on("player:ready", async ({ code, playerId }) => {
     const room = setReady({ code, playerId });
     if (!room) return;
 
@@ -50,9 +50,10 @@ function registerRoomHandler(io, socket) {
 
     // ! Once everyone is ready → start the game.
     if (isAllReady(room)) {
-      startGame({ code, word: TEMP_WORD }); // ? ← replace with AI later
+      const word = await generateWord(room.category, room.difficulty);
+      startGame({ code, word });
       io.to(code).emit("game:started", {
-        maskedWord: "_".repeat(TEMP_WORD.length),
+        maskedWord: "_".repeat(word.length),
         category: room.category,
         livesMax: 6,
       });
