@@ -1,0 +1,260 @@
+.create-room-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 20px;
+  color: white;
+  position: relative;
+
+  overflow: hidden;
+}
+
+.create-room-page .room-card {
+  width: 100%;
+  max-width: 560px;
+
+  padding: 45px;
+
+  border-radius: 28px;
+
+  position: relative;
+  z-index: 2;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+}
+
+.create-room-page .room-card::before {
+  content: "";
+
+  position: absolute;
+  inset: -1px;
+
+  padding: 1px;
+
+  border-radius: 28px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.05)
+  );
+
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  pointer-events: none;
+}
+
+.create-room-page .subtitle {
+  color: #94a3b8;
+  margin-bottom: 35px;
+  text-align: center;
+}
+
+.create-room-page .logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.45);
+}
+
+.create-room-page .title-game {
+  margin: 0;
+  color: white;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-align: center;
+  text-shadow: none;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+.create-room-page .section-title {
+  font-size: 15px;
+  font-weight: 600;
+
+  color: #94a3b8;
+
+  margin-bottom: 10px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 1px;
+}
+
+.create-room-page .room-code {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 18px 20px;
+
+  background: rgba(255, 255, 255, 0.06);
+
+  border-radius: 14px;
+
+  margin-bottom: 25px;
+}
+
+.create-room-page .room-code h2 {
+  margin: 0;
+
+  font-size: 32px;
+
+  font-weight: 700;
+
+  letter-spacing: 5px;
+}
+
+.create-room-page .copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 16px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: #4f46e5;
+
+  color: white;
+
+  transition: 0.25s;
+
+  cursor: pointer;
+}
+
+.create-room-page .copy-btn:hover {
+  background: #4338ca;
+}
+
+.create-room-page .player {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 14px 18px;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  border-radius: 12px;
+
+  margin-bottom: 10px;
+}
+
+.create-room-page .player small {
+  color: #94a3b8;
+  margin-left: 8px;
+}
+
+.create-room-page .ready {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.create-room-page .ready svg,
+.create-room-page .btn-ready svg,
+.create-room-page .btn-leave svg {
+  margin-right: 8px;
+}
+
+.create-room-page .waiting {
+  color: #f59e0b;
+}
+
+.create-room-page .form-select {
+  height: 52px;
+
+  background: #262d44;
+
+  border: none;
+
+  color: white;
+}
+
+.create-room-page .form-select:focus {
+  background: #262d44;
+  color: white;
+  box-shadow: none;
+}
+
+.create-room-page .btn-ready {
+  height: 54px;
+
+  font-weight: 700;
+
+  border: none;
+
+  border-radius: 14px;
+
+  color: white;
+
+  background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+
+  transition: 0.25s;
+}
+
+.create-room-page .btn-ready:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.35);
+}
+
+.create-room-page .btn-leave {
+  height: 54px;
+
+  font-weight: 700;
+
+  border: none;
+
+  border-radius: 14px;
+
+  color: white;
+
+  background: #dc3545;
+
+  transition: 0.25s;
+}
+
+.create-room-page .btn-leave:hover {
+  background: #bb2d3b;
+}
+
+@media (max-width: 768px) {
+  .create-room-page .room-card {
+    margin: 20px;
+    padding: 30px;
+  }
+
+  .create-room-page .room-code {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .create-room-page .room-code h2 {
+    font-size: 28px;
+    letter-spacing: 3px;
+  }
+}
