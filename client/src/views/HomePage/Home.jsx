@@ -69,7 +69,7 @@ export default function Home() {
       setRoom(result.room);
       setShowModal(false);
       toastSuccess(result.rejoined ? `Rejoined room ${roomCode}` : `Joined room ${roomCode}`);
-      const isGameInProgress = result.room.status !== "waiting";
+      const isGameInProgress = ["playing", "round_finished", "finished"].includes(result.room.status);
       if (isGameInProgress) {
         setActiveGame(roomCode);
         navigate(`/game/${roomCode}`);
@@ -82,6 +82,7 @@ export default function Home() {
   };
 
   const handleQuitGame = () => {
+    socket.emit("username:release", { name: username });
     clearSession();
     navigate("/");
   };

@@ -2,22 +2,32 @@ require("dotenv").config();
 
 const express = require("express");
 const app = express();
-const port = 3000;
+const port = Number(process.env.PORT) || 3000;
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const socketHandler = require("./sockets");
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Origin is not allowed by CORS"));
+  },
+};
 
 // !Setup socket server
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: corsOptions.origin,
   },
 });
 
 // !Middleware
-app.use(cors())
+app.use(cors(corsOptions))
 app.use(express.json())
 
 app.get("/", (req, res) => {
