@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { socket } from "../lib/socket";
 
 export const GameContext = createContext(null);
 
@@ -43,6 +44,18 @@ export default function GameProvider({ children }) {
     setActiveGameRoomCodeState("");
     setRoom(null);
   }, []);
+
+  useEffect(() => {
+    if (!username) return undefined;
+
+    const claimUsername = () => socket.emit("username:claim", { name: username }, (result) => {
+      if (result.error) clearSession();
+    });
+
+    if (socket.connected) claimUsername();
+    socket.on("connect", claimUsername);
+    return () => socket.off("connect", claimUsername);
+  }, [clearSession, username]);
 
   const value = useMemo(() => ({
     username,

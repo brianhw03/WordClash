@@ -1,6 +1,6 @@
 import "./CreateRoom.css";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FaArrowRightFromBracket,
   FaCircleCheck,
@@ -20,6 +20,7 @@ export default function CreateRoom() {
   const { roomCode } = useParams();
   const navigate = useNavigate();
   const { playerId, room, setRoom, setActiveGame } = useGame();
+  const [isStarting, setIsStarting] = useState(false);
 
   useEffect(() => {
     const handleRoomUpdate = (updatedRoom) => {
@@ -34,13 +35,19 @@ export default function CreateRoom() {
     };
 
     const handleGameStarted = () => {
+      setIsStarting(false);
       toastSuccess("Game has started");
       setActiveGame(roomCode);
       navigate(`/game/${roomCode}`);
     };
+    const handleGameStartError = ({ error }) => {
+      setIsStarting(false);
+      toastError(error);
+    };
 
     socket.on("room:updated", handleRoomUpdate);
     socket.on("game:started", handleGameStarted);
+    socket.on("game:start-error", handleGameStartError);
     socket.on("player:kicked", handlePlayerKicked);
     socket.emit("room:get", { code: roomCode }, (result) => {
       if (result.error) {
@@ -49,7 +56,7 @@ export default function CreateRoom() {
         return;
       }
 
-      if (result.room.status !== "waiting") {
+      if (["playing", "round_finished", "finished"].includes(result.room.status)) {
         setActiveGame(roomCode);
         navigate(`/game/${roomCode}`, { replace: true });
         return;
@@ -61,6 +68,7 @@ export default function CreateRoom() {
     return () => {
       socket.off("room:updated", handleRoomUpdate);
       socket.off("game:started", handleGameStarted);
+      socket.off("game:start-error", handleGameStartError);
       socket.off("player:kicked", handlePlayerKicked);
     };
   }, [navigate, playerId, roomCode, setActiveGame, setRoom]);
@@ -108,8 +116,12 @@ export default function CreateRoom() {
   };
 
   const handleStartGame = () => {
+    setIsStarting(true);
     socket.emit("game:start", { code: roomCode, playerId }, (result) => {
-      if (result.error) toastError(result.error);
+      if (result.error) {
+        setIsStarting(false);
+        toastError(result.error);
+      }
     });
   };
 
@@ -228,10 +240,10 @@ export default function CreateRoom() {
           <div className="col-12">
             <button
               className="btn btn-start w-100"
-              disabled={!canStart}
+              disabled={!canStart || isStarting}
               onClick={handleStartGame}
             >
-              <FaPlay /> Start Game
+              <FaPlay /> {isStarting ? "Starting Game..." : "Start Game"}
             </button>
           </div>
         </div>

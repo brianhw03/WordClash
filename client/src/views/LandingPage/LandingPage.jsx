@@ -7,6 +7,7 @@ import { useNavigate } from "react-router";
 import { toastSuccess, toastError } from "../../utils/toastify";
 import { FaArrowRight } from "react-icons/fa";
 import { useGame } from "../../context/GameContext";
+import { socket } from "../../lib/socket";
 
 export default function LandingPage() {
   const [username, setUsername] = useState("");
@@ -22,11 +23,13 @@ export default function LandingPage() {
         throw new Error("Username is required");
       }
 
-      setSessionUsername(username);
+      socket.emit("username:claim", { name: username }, (result) => {
+        if (result.error) return toastError(result.error);
 
-      toastSuccess("Welcome to WordClash!");
-
-      navigate("/home");
+        setSessionUsername(result.username);
+        toastSuccess("Welcome to WordClash!");
+        navigate("/home");
+      });
     } catch (error) {
       toastError(error.message);
     }
@@ -60,6 +63,7 @@ export default function LandingPage() {
                 type="text"
                 className="form-control"
                 placeholder="Enter your username"
+                maxLength="20"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />

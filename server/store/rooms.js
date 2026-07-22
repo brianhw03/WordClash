@@ -54,11 +54,8 @@ function joinRoom({ code, name, socketId, playerId }) {
   const room = rooms[code];
   if (!room) return { error: "Room not found" };
 
-  const normalizedName = name.trim().toLowerCase();
   const existingPlayer = Object.values(room.players).find(
-    (player) =>
-      (!player.connected && player.id === playerId) ||
-      (!player.connected && player.name.trim().toLowerCase() === normalizedName),
+    (player) => !player.connected && player.id === playerId,
   );
 
   if (existingPlayer) {
@@ -133,6 +130,20 @@ function kickPlayer({ code, hostId, targetId }) {
 function isAllReady(room) {
   const players = Object.values(room.players);
   return players.length === MAX_PLAYERS && players.every((player) => player.connected && player.ready);
+}
+
+function markGameStarting(code) {
+  const room = rooms[code];
+  if (!room || room.status !== "waiting") return;
+  room.status = "starting";
+  return room;
+}
+
+function cancelGameStarting(code) {
+  const room = rooms[code];
+  if (!room || room.status !== "starting") return;
+  room.status = "waiting";
+  return room;
 }
 
 function startRound({ code, word, resetMatch = false }) {
@@ -276,6 +287,8 @@ module.exports = {
   setReady,
   kickPlayer,
   isAllReady,
+  markGameStarting,
+  cancelGameStarting,
   startRound,
   placeGuess,
   finishRound,

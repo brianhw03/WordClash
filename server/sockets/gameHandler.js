@@ -1,8 +1,13 @@
-const { placeGuess, serializeRoom } = require("../store/rooms");
+const { getRoom, placeGuess, serializeRoom } = require("../store/rooms");
 const { completeRound } = require("./roundManager");
 
 function registerGameHandler(io, socket) {
   socket.on("game:guess", ({ code, playerId, letter }, callback) => {
+    const room = getRoom(code);
+    const player = room?.players[playerId];
+    if (!player?.connected || player.socketId !== socket.id) {
+      return callback?.({ error: "Unauthorized player" });
+    }
     const result = placeGuess({ code, playerId, letter });
     if (result.error) return callback?.({ error: result.error });
 
