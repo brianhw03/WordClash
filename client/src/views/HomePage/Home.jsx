@@ -8,6 +8,7 @@ import Logo from "../../components/Logo";
 import PageBackground from "../../components/PageBackground";
 import MenuCard from "../../components/MenuCard";
 import JoinRoomModal from "../../components/JoinRoomModal";
+import { toastSuccess } from "../../utils/toastify";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -15,6 +16,11 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
 
   const username = localStorage.getItem("username");
+
+  const handleJoinRoom = (roomCode) => {
+    setShowModal(false);
+    toastSuccess(`Joining room ${roomCode}`);
+  };
 
   return (
     <main className="home-page">
@@ -54,7 +60,11 @@ export default function Home() {
         </div>
       </div>
 
-      <JoinRoomModal show={showModal} onClose={() => setShowModal(false)} />
+      <JoinRoomModal
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        onJoin={handleJoinRoom}
+      />
     </main>
   );
 }

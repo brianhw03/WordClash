@@ -92,7 +92,7 @@
 }
 
 /* Card */
-.title-game {
+.landing-page .title-game {
   letter-spacing: 4px;
   font-weight: 800;
   text-transform: uppercase;
@@ -153,7 +153,7 @@
 }
 
 /* Logo */
-.logo {
+.landing-page .logo {
   width: 90px;
   height: 90px;
 
@@ -164,13 +164,13 @@
   box-shadow: 0 10px 30px rgba(99, 102, 241, 0.45);
 }
 
-h1 {
+.landing-page h1 {
   font-size: 52px;
   font-weight: 800;
   letter-spacing: 2px;
 }
 
-.subtitle {
+.landing-page .subtitle {
   color: #cbd5e1;
   margin-top: 12px;
   margin-bottom: 40px;
@@ -179,32 +179,32 @@ h1 {
 
 /* Input */
 
-.input-group {
+.landing-page .input-group {
   background: rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   overflow: hidden;
 }
 
-.input-group-text {
+.landing-page .input-group-text {
   background: transparent;
   border: none;
   color: #94a3b8;
   padding-left: 18px;
 }
 
-.form-control {
+.landing-page .form-control {
   background: transparent;
   border: none;
   color: white;
   height: 58px;
 }
 
-.form-control::placeholder {
+.landing-page .form-control::placeholder {
   color: #94a3b8;
 }
 
-.form-control:focus {
+.landing-page .form-control:focus {
   background: transparent;
   color: white;
   box-shadow: none;
@@ -212,7 +212,7 @@ h1 {
 
 /* Button */
 
-.btn-play {
+.landing-page .btn-play {
   margin-top: 30px;
   height: 58px;
   border-radius: 14px;
@@ -223,12 +223,12 @@ h1 {
   transition: 0.25s;
 }
 
-.btn-play:hover {
+.landing-page .btn-play:hover {
   transform: translateY(-3px);
   box-shadow: 0 15px 35px rgba(99, 102, 241, 0.45);
 }
 
-.footer {
+.landing-page .footer {
   margin-top: 28px;
   color: #94a3b8;
   font-size: 14px;
@@ -239,7 +239,7 @@ h1 {
     display: none;
   }
 
-  h1 {
+  .landing-page h1 {
     font-size: 38px;
   }
 }

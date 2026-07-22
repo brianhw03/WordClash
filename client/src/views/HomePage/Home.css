@@ -8,6 +8,7 @@
   position: relative;
 
   overflow: hidden;
+  font-family: "Segoe UI", sans-serif;
 }
 
 .card-home {
@@ -126,7 +127,7 @@
   font-weight: 600;
 }
 
-.logo {
+.home-page .logo {
   width: 80px;
   height: 80px;
 
@@ -146,15 +147,18 @@
   box-shadow: 0 10px 30px rgba(99, 102, 241, 0.45);
 }
 
-.title-game {
-  font-size: 42px;
-
+.home-page .title-game {
+  font-size: 52px;
   font-weight: 800;
-
-  color: white;
-
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-shadow:
+    0 4px 15px rgba(79, 70, 229, 0.45),
+    0 0 35px rgba(139, 92, 246, 0.25);
+  background: linear-gradient(90deg, #ffffff, #dbeafe, #ffffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   text-align: center;
-
   margin: 0;
 }
 
@@ -164,6 +168,7 @@
     background:rgba(0,0,0,.75);
     backdrop-filter:blur(4px);
     z-index:999;
+    animation:modal-backdrop-fade-in .15s linear;
 }
 
 .join-modal-wrapper{
@@ -177,7 +182,8 @@
 
 .join-modal{
 
-    width:430px;
+    width:calc(100% - 32px);
+    max-width:460px;
 
     background:#171d31;
 
@@ -188,6 +194,29 @@
     box-shadow:0 25px 80px rgba(0,0,0,.45);
 
     overflow:hidden;
+    animation:join-modal-enter .3s ease-out;
+}
+
+@keyframes modal-backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes join-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .join-modal-header{
@@ -253,7 +282,9 @@
 
 .room-input{
 
-    width:100%;
+    width:95%;
+    display:block;
+    margin:0 auto;
 
     height:52px;
 
@@ -296,7 +327,7 @@
 
     display:flex;
 
-    gap:14px;
+    gap:16px;
 
     padding:0 22px 22px;
 }

@@ -1,7 +1,17 @@
 import { useState } from "react";
+import { toastError } from "../utils/toastify";
 
-export default function JoinRoomModal({ show, onClose }) {
+export default function JoinRoomModal({ show, onClose, onJoin }) {
   const [roomCode, setRoomCode] = useState("");
+
+  const handleJoin = () => {
+    if (roomCode.trim().length !== 6) {
+      toastError("Room code must contain 6 characters");
+      return;
+    }
+
+    onJoin?.(roomCode.trim());
+  };
 
   if (!show) return null;
 
@@ -10,10 +20,15 @@ export default function JoinRoomModal({ show, onClose }) {
       <div className="modal-backdrop-custom" onClick={onClose}></div>
 
       <div className="join-modal-wrapper">
-        <div className="join-modal">
+        <div
+          className="join-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="join-room-title"
+        >
 
           <div className="join-modal-header">
-            <h4>Join Room</h4>
+            <h4 id="join-room-title">Join Room</h4>
           </div>
 
           <div className="join-modal-body">
@@ -25,6 +40,8 @@ export default function JoinRoomModal({ show, onClose }) {
               className="room-input"
               placeholder="Room Code (e.g. ABC123)"
               value={roomCode}
+              autoFocus
+              aria-label="Room code"
               onChange={(e) =>
                 setRoomCode(e.target.value.toUpperCase())
               }
@@ -42,6 +59,7 @@ export default function JoinRoomModal({ show, onClose }) {
 
             <button
               className="join-btn"
+              onClick={handleJoin}
             >
               Join Room
             </button>
