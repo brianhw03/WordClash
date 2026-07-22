@@ -1,4 +1,4 @@
-const { generateWord } = require("../controllers/aiController");
+const { generateRoundContent } = require("../controllers/aiController");
 const {
   getRoom,
   startRound,
@@ -37,8 +37,8 @@ async function beginRound(io, code, resetMatch = false) {
   const room = getRoom(code);
   if (!room) return;
 
-  const word = await generateWord(room.category, room.usedWords);
-  const startedRoom = startRound({ code, word, resetMatch });
+  const roundContent = await generateRoundContent(room.category, room.usedWords);
+  const startedRoom = startRound({ code, ...roundContent, resetMatch });
   beginTimer(io, code);
   io.to(code).emit("room:updated", serializeRoom(startedRoom));
   io.to(code).emit("game:started", {

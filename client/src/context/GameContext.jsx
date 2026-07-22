@@ -3,6 +3,40 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { socket } from "../lib/socket";
 
 export const GameContext = createContext(null);
+const RECONNECT_IDS_KEY = "wordclash.reconnectPlayerIds";
+
+function usernameKey(value = "") {
+  return value.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function getReconnectPlayerId(name) {
+  try {
+    const savedIds = JSON.parse(localStorage.getItem(RECONNECT_IDS_KEY) || "{}");
+    return savedIds[usernameKey(name)] || "";
+  } catch {
+    return "";
+  }
+}
+
+function saveReconnectPlayerId(name, playerId) {
+  try {
+    const savedIds = JSON.parse(localStorage.getItem(RECONNECT_IDS_KEY) || "{}");
+    savedIds[usernameKey(name)] = playerId;
+    localStorage.setItem(RECONNECT_IDS_KEY, JSON.stringify(savedIds));
+  } catch {
+    // Reconnect can still work in the current tab through sessionStorage.
+  }
+}
+
+function removeReconnectPlayerId(name) {
+  try {
+    const savedIds = JSON.parse(localStorage.getItem(RECONNECT_IDS_KEY) || "{}");
+    delete savedIds[usernameKey(name)];
+    localStorage.setItem(RECONNECT_IDS_KEY, JSON.stringify(savedIds));
+  } catch {
+    // Nothing else is needed when browser storage is unavailable.
+  }
+}
 
 export default function GameProvider({ children }) {
   const [username, setUsernameState] = useState(() => sessionStorage.getItem("username") || "");
@@ -17,6 +51,10 @@ export default function GameProvider({ children }) {
     const nextUsername = value.trim();
     sessionStorage.setItem("username", nextUsername);
     setUsernameState(nextUsername);
+    const reconnectPlayerId = getReconnectPlayerId(nextUsername);
+    if (reconnectPlayerId) sessionStorage.setItem("playerId", reconnectPlayerId);
+    else sessionStorage.removeItem("playerId");
+    setPlayerIdState(reconnectPlayerId);
   }, []);
 
   const setRoomSession = useCallback((nextRoomCode, nextPlayerId) => {
@@ -24,7 +62,8 @@ export default function GameProvider({ children }) {
     sessionStorage.setItem("playerId", nextPlayerId);
     setRoomCodeState(nextRoomCode);
     setPlayerIdState(nextPlayerId);
-  }, []);
+    if (username) saveReconnectPlayerId(username, nextPlayerId);
+  }, [username]);
 
   const setActiveGame = useCallback((nextRoomCode) => {
     sessionStorage.setItem("activeGameRoomCode", nextRoomCode);
@@ -37,13 +76,14 @@ export default function GameProvider({ children }) {
   }, []);
 
   const clearSession = useCallback(() => {
+    if (username) removeReconnectPlayerId(username);
     sessionStorage.clear();
     setUsernameState("");
     setPlayerIdState("");
     setRoomCodeState("");
     setActiveGameRoomCodeState("");
     setRoom(null);
-  }, []);
+  }, [username]);
 
   useEffect(() => {
     if (!username) return undefined;

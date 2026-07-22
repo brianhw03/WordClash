@@ -36,6 +36,8 @@ function createRoom({ name, socketId, category = "Animal", rounds = 3 }) {
     currentRound: 0,
     roundEndsAt: null,
     word: null,
+    hint: null,
+    hintRevealed: false,
     usedWords: [],
     rematchVotes: {},
     players: { [host.id]: host },
@@ -146,11 +148,13 @@ function cancelGameStarting(code) {
   return room;
 }
 
-function startRound({ code, word, resetMatch = false }) {
+function startRound({ code, word, hint, resetMatch = false }) {
   const room = rooms[code];
   if (!room) return;
 
   room.word = word.toUpperCase().trim();
+  room.hint = hint || null;
+  room.hintRevealed = false;
   if (!Array.isArray(room.usedWords)) room.usedWords = [];
   room.usedWords.push(room.word);
   room.status = "playing";
@@ -165,6 +169,16 @@ function startRound({ code, word, resetMatch = false }) {
     if (resetMatch) player.score = 0;
   });
   return room;
+}
+
+function revealHint({ code }) {
+  const room = rooms[code];
+  if (!room) return { error: "Room not found" };
+  if (room.status !== "playing") return { error: "Game is not running" };
+  if (!room.hint) return { error: "Hint is unavailable" };
+
+  room.hintRevealed = true;
+  return { room, hint: room.hint };
 }
 
 function placeGuess({ code, playerId, letter }) {
@@ -220,6 +234,8 @@ function resetMatch(code) {
   room.currentRound = 0;
   room.roundEndsAt = null;
   room.word = null;
+  room.hint = null;
+  room.hintRevealed = false;
   room.usedWords = [];
   room.winner = null;
   room.rematchVotes = {};
@@ -261,6 +277,8 @@ function serializeRoom(room) {
     currentRound: room.currentRound,
     targetWins: Math.ceil(room.rounds / 2),
     roundEndsAt: room.roundEndsAt,
+    hint: room.hintRevealed ? room.hint : null,
+    hintAvailable: Boolean(room.hint),
     hostId: room.hostId,
     players: Object.values(room.players).map((player) => ({
       id: player.id,
@@ -290,6 +308,7 @@ module.exports = {
   markGameStarting,
   cancelGameStarting,
   startRound,
+  revealHint,
   placeGuess,
   finishRound,
   resetMatch,

@@ -59,7 +59,17 @@ function registerRoomHandler(io, socket) {
   });
 
   socket.on("room:join", ({ code, name, playerId }, callback) => {
-    if (!isUsernameClaimedBy({ name, socketId: socket.id })) {
+    const room = getRoom(code);
+    const knownPlayer = room?.players[playerId];
+    const isReconnect = Boolean(
+      knownPlayer &&
+      !knownPlayer.connected &&
+      knownPlayer.name.trim().toLowerCase() === String(name || "").trim().toLowerCase(),
+    );
+
+    // A reconnect may arrive before the client has re-claimed its username after a socket reconnect.
+    // The stored playerId plus matching name proves this is an existing room player.
+    if (!isReconnect && !isUsernameClaimedBy({ name, socketId: socket.id })) {
       return callback({ error: "Please choose an available username first" });
     }
     const result = joinRoom({ code, name, socketId: socket.id, playerId });

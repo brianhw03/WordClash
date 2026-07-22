@@ -195,6 +195,12 @@ export default function Gameplay() {
     });
   }, [currentPlayer, guessedKeys, playerId, room?.status, roomCode]);
 
+  const handleShowHint = () => {
+    socket.emit("game:hint", { code: roomCode, playerId }, (result) => {
+      if (result?.error) toastError(result.error);
+    });
+  };
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       const letter = event.key.toUpperCase();
@@ -270,6 +276,20 @@ export default function Gameplay() {
                   ))}
                 </div>
               ))}
+            </div>
+            <div className="hint-section">
+              {room?.hint ? (
+                <p><strong>Shared Hint:</strong> {room.hint}</p>
+              ) : (
+                <button
+                  className="hint-btn"
+                  type="button"
+                  onClick={handleShowHint}
+                  disabled={room?.status !== "playing" || !room?.hintAvailable}
+                >
+                  Show Shared Hint
+                </button>
+              )}
             </div>
           </section>
 

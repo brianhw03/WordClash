@@ -71,6 +71,15 @@ const FALLBACK_WORDS = {
   ],
 };
 
+const FALLBACK_HINTS = {
+  animal: "Think of a familiar creature from the animal kingdom.",
+  country: "Think of a well-known nation on the world map.",
+  job: "Think of a common profession people do for work.",
+  movie: "Think of a famous film title recognized by many audiences.",
+  artist: "Think of a globally known entertainer or music performer.",
+  music: "Think of a well-known song title heard by many listeners.",
+};
+
 const RECENT_WORD_LIMIT = 30;
 const RECENT_WORDS_FILE = path.join(__dirname, "../data/recent-words.json");
 
@@ -140,6 +149,21 @@ function isValidWord(word) {
   );
 }
 
+function isValidHint(hint, word) {
+  const cleanHint = String(hint || "").replace(/\s+/g, " ").trim();
+  const hintWords = cleanHint.split(" ").filter(Boolean);
+  if (hintWords.length < 5 || hintWords.length > 24 || cleanHint.length > 180) return false;
+
+  const normalizedHint = cleanHint.toUpperCase().replace(/[^A-Z]/g, "");
+  const normalizedWord = word.replace(/[^A-Z]/g, "");
+  if (normalizedHint.includes(normalizedWord)) return false;
+
+  return !word
+    .split(/[ '\-]+/)
+    .filter((part) => part.length >= 4)
+    .some((part) => new RegExp(`\\b${part}\\b`, "i").test(cleanHint));
+}
+
 const MOVIE_FOCUSES = [
   "an animated film",
   "a science-fiction film",
@@ -155,8 +179,8 @@ const MOVIE_FOCUSES = [
   "a film released after 2010",
 ];
 
-// Generate one Hangman answer via OpenAI.
-async function generateWord(category, excludedWords = []) {
+// Generate the answer and its shared hint in one request to avoid extra game delay.
+async function generateRoundContent(category, excludedWords = []) {
   const normalizedCategory = normalizeCategory(category);
   const excluded = new Set(
     [...excludedWords, ...getRecentWords(normalizedCategory)].map((word) =>
@@ -199,22 +223,26 @@ Rules: the answer may contain multiple words. Keep spaces, apostrophes, and hyph
 Examples of valid Music answers: YESTERDAY, WONDERWALL, BILLIE JEAN.
 Do not use any of these answers that were recently used: ${[...excluded].join(", ") || "none"}.
 Variation token: ${varietyToken}. Use it only to vary your choice; never include it in the answer.
+Also provide one fair shared hint in English. The hint must be 5 to 24 words, describe the answer without giving away its title/name, and must not contain the answer or any significant word from it.
 ${retryInstruction}
-Format: {"word":"EXAMPLE"}`,
+Format: {"word":"EXAMPLE","hint":"A concise clue that does not reveal the answer."}`,
           },
         ],
         response_format: {
           type: "json_schema",
           json_schema: {
-            name: "hangman_word",
+            name: "hangman_round_content",
             strict: true,
             schema: {
               type: "object",
               additionalProperties: false,
-              required: ["word"],
+              required: ["word", "hint"],
               properties: {
                 word: {
                   ...wordSchema,
+                },
+                hint: {
+                  type: "string",
                 },
               },
             },
@@ -231,9 +259,10 @@ Format: {"word":"EXAMPLE"}`,
         .replace(/\s+/g, " ")
         .trim();
 
-      if (isValidWord(clean) && !excluded.has(clean)) {
-        console.info(`AI generated a ${normalizedCategory} word.`);
-        return rememberWord(normalizedCategory, clean);
+        const hint = String(result.hint || "").replace(/\s+/g, " ").trim();
+        if (isValidWord(clean) && !excluded.has(clean) && isValidHint(hint, clean)) {
+          console.info(`AI generated a ${normalizedCategory} word.`);
+          return { word: rememberWord(normalizedCategory, clean), hint };
       }
 
       console.warn(
@@ -241,18 +270,24 @@ Format: {"word":"EXAMPLE"}`,
       );
     }
 
-    return rememberWord(
-      normalizedCategory,
-      getFallbackWord(normalizedCategory, [...excluded]),
-    );
+    return {
+      word: rememberWord(
+        normalizedCategory,
+        getFallbackWord(normalizedCategory, [...excluded]),
+      ),
+      hint: FALLBACK_HINTS[normalizedCategory],
+    };
   } catch (err) {
     // ! API error / timeout → don't let the game die, use fallback.
     console.log("AI generateWord failed, using fallback:", err.message);
-    return rememberWord(
-      normalizedCategory,
-      getFallbackWord(normalizedCategory, [...excluded]),
-    );
+    return {
+      word: rememberWord(
+        normalizedCategory,
+        getFallbackWord(normalizedCategory, [...excluded]),
+      ),
+      hint: FALLBACK_HINTS[normalizedCategory],
+    };
   }
 }
 
-module.exports = { generateWord };
+module.exports = { generateRoundContent };
