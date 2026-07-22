@@ -6,6 +6,7 @@ import {
   FaCircleCheck,
   FaCopy,
   FaPlay,
+  FaUserXmark,
 } from "react-icons/fa6";
 import { useNavigate, useParams } from "react-router";
 
@@ -25,14 +26,32 @@ export default function CreateRoom() {
       if (updatedRoom.code === roomCode) setRoom(updatedRoom);
     };
 
-    const handleGameStarted = () => toastSuccess("Game has started");
+    const handlePlayerKicked = ({ playerId: kickedPlayerId }) => {
+      if (kickedPlayerId === playerId) {
+        toastError("You were kicked from the room");
+        navigate("/home");
+      }
+    };
+
+    const handleGameStarted = () => {
+      toastSuccess("Game has started");
+      sessionStorage.setItem("activeGameRoomCode", roomCode);
+      navigate(`/game/${roomCode}`);
+    };
 
     socket.on("room:updated", handleRoomUpdate);
     socket.on("game:started", handleGameStarted);
+    socket.on("player:kicked", handlePlayerKicked);
     socket.emit("room:get", { code: roomCode }, (result) => {
       if (result.error) {
         toastError(result.error);
         navigate("/home");
+        return;
+      }
+
+      if (result.room.status !== "waiting") {
+        sessionStorage.setItem("activeGameRoomCode", roomCode);
+        navigate(`/game/${roomCode}`, { replace: true });
         return;
       }
 
@@ -42,8 +61,9 @@ export default function CreateRoom() {
     return () => {
       socket.off("room:updated", handleRoomUpdate);
       socket.off("game:started", handleGameStarted);
+      socket.off("player:kicked", handlePlayerKicked);
     };
-  }, [navigate, roomCode]);
+  }, [navigate, playerId, roomCode]);
 
   const currentPlayer = useMemo(
     () => room?.players.find((player) => player.id === playerId),
@@ -93,6 +113,12 @@ export default function CreateRoom() {
     });
   };
 
+  const handleKick = (targetId) => {
+    socket.emit("player:kick", { code: roomCode, playerId, targetId }, (result) => {
+      if (result.error) toastError(result.error);
+    });
+  };
+
   const players = room?.players || [];
   const isHost = room?.hostId === playerId;
   const canStart =
@@ -120,16 +146,23 @@ export default function CreateRoom() {
         <div className="section-title">Players</div>
         {players.map((player) => (
           <div className="player" key={player.id}>
-            <div>
+            <div className="player-identity">
               {player.id === room.hostId ? "👑" : "😀"} {player.name}
               {player.id === room.hostId && <small> Host</small>}
+              {isHost && player.id !== playerId && (
+                <button className="kick-btn" onClick={() => handleKick(player.id)} title="Kick player">
+                  <FaUserXmark />
+                </button>
+              )}
             </div>
-            <div className={player.ready ? "ready" : "waiting"}>
-              {player.ready && <FaCircleCheck />} {player.ready
-                ? "Ready"
-                : player.connected
-                  ? "Waiting..."
-                  : "Disconnected"}
+            <div className="player-status">
+              <div className={player.ready ? "ready" : "waiting"}>
+                {player.ready && <FaCircleCheck />} {player.ready
+                  ? "Ready"
+                  : player.connected
+                    ? "Not Ready"
+                    : "Disconnected"}
+              </div>
             </div>
           </div>
         ))}
@@ -181,9 +214,10 @@ export default function CreateRoom() {
               onChange={handleSettingChange("rounds")}
               value={String(room?.rounds || 3)}
             >
-              <option value="1">1 Round</option>
-              <option value="3">3 Rounds</option>
-              <option value="5">5 Rounds</option>
+              <option value="1">Best of 1</option>
+              <option value="3">Best of 3</option>
+              <option value="5">Best of 5</option>
+              <option value="7">Best of 7</option>
             </select>
           </div>
         </div>
@@ -196,11 +230,10 @@ export default function CreateRoom() {
           </div>
           <div className="col-6">
             <button
-              className="btn btn-ready w-100"
-              disabled={currentPlayer?.ready}
+              className={`btn btn-ready w-100 ${currentPlayer?.ready ? "ready-active" : ""}`}
               onClick={handleReady}
             >
-              <FaCircleCheck /> {currentPlayer?.ready ? "Ready" : "Ready"}
+              <FaCircleCheck /> Ready
             </button>
           </div>
         </div>

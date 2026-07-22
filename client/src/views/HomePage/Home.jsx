@@ -63,7 +63,14 @@ export default function Home() {
       saveRoomSession(roomCode, result.playerId);
       setShowModal(false);
       toastSuccess(result.rejoined ? `Rejoined room ${roomCode}` : `Joined room ${roomCode}`);
-      navigate(`/room/${roomCode}`);
+      const isGameInProgress = result.room.status !== "waiting";
+      if (isGameInProgress) {
+        sessionStorage.setItem("activeGameRoomCode", roomCode);
+        navigate(`/game/${roomCode}`);
+      } else {
+        sessionStorage.removeItem("activeGameRoomCode");
+        navigate(`/room/${roomCode}`);
+      }
       },
     );
   };

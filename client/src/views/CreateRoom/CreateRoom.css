@@ -183,6 +183,31 @@
   color: #f59e0b;
 }
 
+.create-room-page .player-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.create-room-page .player-identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.create-room-page .kick-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  background: #dc3545;
+}
+
+.create-room-page .kick-btn:hover {
+  background: #bb2d3b;
+}
+
 .create-room-page .form-select {
   height: 52px;
 
@@ -210,7 +235,7 @@
 
   color: white;
 
-  background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+  background: #16a34a;
 
   transition: 0.25s;
 }
@@ -218,7 +243,17 @@
 .create-room-page .btn-ready:hover {
   transform: translateY(-2px);
 
-  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.35);
+  background: #15803d;
+  box-shadow: 0 10px 25px rgba(34, 197, 94, 0.35);
+}
+
+.create-room-page .btn-ready.ready-active {
+  background: #166534;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.create-room-page .btn-ready.ready-active:hover {
+  background: #14532d;
 }
 
 .create-room-page .form-select:disabled {
@@ -239,7 +274,7 @@
   border-radius: 14px;
   color: white;
   font-weight: 700;
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  background: linear-gradient(135deg, #4f46e5, #8b5cf6);
   transition: 0.25s;
 }
 
@@ -249,7 +284,7 @@
 
 .create-room-page .btn-start:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.35);
 }
 
 .create-room-page .btn-start:disabled {
