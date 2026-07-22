@@ -221,6 +221,42 @@
   box-shadow: 0 10px 25px rgba(99, 102, 241, 0.35);
 }
 
+.create-room-page .form-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.create-room-page .btn-ready:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+  box-shadow: none;
+}
+
+.create-room-page .btn-start {
+  height: 54px;
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-weight: 700;
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  transition: 0.25s;
+}
+
+.create-room-page .btn-start svg {
+  margin-right: 8px;
+}
+
+.create-room-page .btn-start:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+}
+
+.create-room-page .btn-start:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .create-room-page .btn-leave {
   height: 54px;
 

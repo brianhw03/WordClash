@@ -20,7 +20,7 @@ export default function LandingPage() {
         throw new Error("Username is required");
       }
 
-      localStorage.setItem("username", username.trim());
+      sessionStorage.setItem("username", username.trim());
 
       toastSuccess("Welcome to WordClash!");
 
