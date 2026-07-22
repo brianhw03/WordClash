@@ -7,15 +7,21 @@ import { useNavigate, useParams } from "react-router";
 import PageBackground from "../../components/PageBackground";
 import { socket } from "../../lib/socket";
 import { toastError } from "../../utils/toastify";
+import { useGame } from "../../context/GameContext";
 
 const KEYBOARD_ROWS = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
 
 export default function Gameplay() {
   const { roomCode } = useParams();
   const navigate = useNavigate();
-  const playerId = sessionStorage.getItem("playerId");
-  const username = sessionStorage.getItem("username");
-  const [room, setRoom] = useState(null);
+  const {
+    playerId,
+    username,
+    room,
+    setRoom,
+    setActiveGame,
+    clearActiveGame,
+  } = useGame();
   const [guessedKeys, setGuessedKeys] = useState({});
   const [gameOver, setGameOver] = useState(null);
   const [roundEnd, setRoundEnd] = useState(null);
@@ -37,7 +43,7 @@ export default function Gameplay() {
       setOpponentRequestedRematch(false);
     };
     const handleRematch = () => {
-      sessionStorage.removeItem("activeGameRoomCode");
+      clearActiveGame();
       navigate(`/room/${roomCode}`);
     };
     const restoreFinishedGame = (updatedRoom) => {
@@ -83,7 +89,7 @@ export default function Gameplay() {
           return;
         }
         if (result.room.status !== "waiting") {
-          sessionStorage.setItem("activeGameRoomCode", roomCode);
+          setActiveGame(roomCode);
         }
         setRoom(result.room);
         restoreFinishedGame(result.room);
@@ -100,7 +106,7 @@ export default function Gameplay() {
       const player = result.room.players.find((candidate) => candidate.id === playerId);
       if (player?.connected) {
         if (result.room.status !== "waiting") {
-          sessionStorage.setItem("activeGameRoomCode", roomCode);
+          setActiveGame(roomCode);
         }
         setRoom(result.room);
         restoreFinishedGame(result.room);
@@ -119,7 +125,7 @@ export default function Gameplay() {
       socket.off("game:rematch-status", handleRematchStatus);
       socket.off("game:rematch-cancelled", handleRematchCancelled);
     };
-  }, [navigate, playerId, roomCode, username]);
+  }, [clearActiveGame, navigate, playerId, roomCode, setActiveGame, setRoom, username]);
 
   useEffect(() => {
     if (!room?.roundEndsAt) return undefined;
@@ -147,13 +153,13 @@ export default function Gameplay() {
 
     const timer = setTimeout(() => {
       if (opponentLeftCountdown <= 1) {
-        sessionStorage.removeItem("activeGameRoomCode");
+        clearActiveGame();
         navigate("/home");
       } else setOpponentLeftCountdown((seconds) => seconds - 1);
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [navigate, opponentLeftCountdown]);
+  }, [clearActiveGame, navigate, opponentLeftCountdown]);
 
   const currentPlayer = useMemo(
     () => room?.players.find((player) => player.id === playerId),
@@ -205,7 +211,7 @@ export default function Gameplay() {
 
   const handleBackHome = () => {
     socket.emit("room:leave", { code: roomCode, playerId }, () => {
-      sessionStorage.removeItem("activeGameRoomCode");
+      clearActiveGame();
       navigate("/home");
     });
   };
@@ -238,8 +244,7 @@ export default function Gameplay() {
             </div>
             <div className="timer-box game-timer"><small>TIME</small><strong>{timeLeft}s</strong></div>
             <div className="game-meta">
-              <div className="category-box"><small>CATEGORY</small><strong>{room?.category || "General"}</strong></div>
-              <div className="difficulty-box"><small>DIFFICULTY</small><strong>{room?.difficulty || "Easy"}</strong></div>
+              <div className="category-box"><small>CATEGORY</small><strong>{room?.category || "Animal"}</strong></div>
               <div className="round-box"><small>ROUND</small><strong>{room?.currentRound || 1} / {room?.rounds || 3}</strong></div>
             </div>
           </header>
@@ -252,9 +257,17 @@ export default function Gameplay() {
 
           <section className="word-section">
             <div className="word">
-              {maskedWord.split("").map((letter, index) => (
-                <div className={`word-box ${letter !== "_" ? "active" : ""}`} key={`${letter}-${index}`}>
-                  {letter === "_" ? "" : letter}
+              {maskedWord.split(" ").map((wordPart, wordIndex) => (
+                <div className="word-group" key={`${wordPart}-${wordIndex}`}>
+                  {[...wordPart].map((letter, letterIndex) => (
+                    /[A-Z_]/.test(letter) ? (
+                      <div className={`word-box ${letter !== "_" ? "active" : ""}`} key={`${letter}-${letterIndex}`}>
+                        {letter === "_" ? "" : letter}
+                      </div>
+                    ) : (
+                      <span className="word-separator" key={`${letter}-${letterIndex}`}>{letter}</span>
+                    )
+                  ))}
                 </div>
               ))}
             </div>

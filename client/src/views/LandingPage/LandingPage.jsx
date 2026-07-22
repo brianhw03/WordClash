@@ -6,11 +6,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toastSuccess, toastError } from "../../utils/toastify";
 import { FaArrowRight } from "react-icons/fa";
+import { useGame } from "../../context/GameContext";
 
 export default function LandingPage() {
   const [username, setUsername] = useState("");
 
   const navigate = useNavigate();
+  const { setUsername: setSessionUsername } = useGame();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +22,7 @@ export default function LandingPage() {
         throw new Error("Username is required");
       }
 
-      sessionStorage.setItem("username", username.trim());
+      setSessionUsername(username);
 
       toastSuccess("Welcome to WordClash!");
 

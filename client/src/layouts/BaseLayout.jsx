@@ -1,10 +1,11 @@
 import { Navigate, Outlet, useLocation } from "react-router";
+import { useGame } from "../context/GameContext";
 
 export default function BaseLayout() {
   const location = useLocation();
-  const activeGameRoomCode = sessionStorage.getItem("activeGameRoomCode");
+  const { activeGameRoomCode, username } = useGame();
 
-  if (!sessionStorage.getItem("username")) {
+  if (!username) {
     return <Navigate to="/" replace />;
   }
 

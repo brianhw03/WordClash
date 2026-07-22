@@ -10,18 +10,22 @@ import MenuCard from "../../components/MenuCard";
 import JoinRoomModal from "../../components/JoinRoomModal";
 import { socket } from "../../lib/socket";
 import { toastError, toastSuccess } from "../../utils/toastify";
+import { useGame } from "../../context/GameContext";
 
 export default function Home() {
   const navigate = useNavigate();
 
   const [showModal, setShowModal] = useState(false);
 
-  const username = sessionStorage.getItem("username");
-
-  const saveRoomSession = (roomCode, playerId) => {
-    sessionStorage.setItem("roomCode", roomCode);
-    sessionStorage.setItem("playerId", playerId);
-  };
+  const {
+    username,
+    playerId,
+    setRoomSession,
+    setActiveGame,
+    clearActiveGame,
+    clearSession,
+    setRoom,
+  } = useGame();
 
   const handleCreateRoom = () => {
     if (!username) {
@@ -32,11 +36,12 @@ export default function Home() {
 
     socket.emit(
       "room:create",
-      { name: username, category: "General", difficulty: "Easy" },
+      { name: username, category: "Animal" },
       (result) => {
         if (result.error) return toastError(result.error);
 
-        saveRoomSession(result.code, result.playerId);
+        setRoomSession(result.code, result.playerId);
+        setRoom(result.room);
         toastSuccess(`Room ${result.code} created`);
         navigate(`/room/${result.code}`);
       },
@@ -55,20 +60,21 @@ export default function Home() {
       {
         code: roomCode,
         name: username,
-        playerId: sessionStorage.getItem("playerId"),
+        playerId,
       },
       (result) => {
       if (result.error) return toastError(result.error);
 
-      saveRoomSession(roomCode, result.playerId);
+      setRoomSession(roomCode, result.playerId);
+      setRoom(result.room);
       setShowModal(false);
       toastSuccess(result.rejoined ? `Rejoined room ${roomCode}` : `Joined room ${roomCode}`);
       const isGameInProgress = result.room.status !== "waiting";
       if (isGameInProgress) {
-        sessionStorage.setItem("activeGameRoomCode", roomCode);
+        setActiveGame(roomCode);
         navigate(`/game/${roomCode}`);
       } else {
-        sessionStorage.removeItem("activeGameRoomCode");
+        clearActiveGame();
         navigate(`/room/${roomCode}`);
       }
       },
@@ -76,7 +82,7 @@ export default function Home() {
   };
 
   const handleQuitGame = () => {
-    sessionStorage.clear();
+    clearSession();
     navigate("/");
   };
 

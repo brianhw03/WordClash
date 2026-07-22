@@ -1,6 +1,6 @@
 import "./CreateRoom.css";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   FaArrowRightFromBracket,
   FaCircleCheck,
@@ -14,12 +14,12 @@ import PageBackground from "../../components/PageBackground";
 import Logo from "../../components/Logo";
 import { socket } from "../../lib/socket";
 import { toastError, toastSuccess } from "../../utils/toastify";
+import { useGame } from "../../context/GameContext";
 
 export default function CreateRoom() {
   const { roomCode } = useParams();
   const navigate = useNavigate();
-  const [room, setRoom] = useState(null);
-  const playerId = sessionStorage.getItem("playerId");
+  const { playerId, room, setRoom, setActiveGame } = useGame();
 
   useEffect(() => {
     const handleRoomUpdate = (updatedRoom) => {
@@ -35,7 +35,7 @@ export default function CreateRoom() {
 
     const handleGameStarted = () => {
       toastSuccess("Game has started");
-      sessionStorage.setItem("activeGameRoomCode", roomCode);
+      setActiveGame(roomCode);
       navigate(`/game/${roomCode}`);
     };
 
@@ -50,7 +50,7 @@ export default function CreateRoom() {
       }
 
       if (result.room.status !== "waiting") {
-        sessionStorage.setItem("activeGameRoomCode", roomCode);
+        setActiveGame(roomCode);
         navigate(`/game/${roomCode}`, { replace: true });
         return;
       }
@@ -63,7 +63,7 @@ export default function CreateRoom() {
       socket.off("game:started", handleGameStarted);
       socket.off("player:kicked", handlePlayerKicked);
     };
-  }, [navigate, playerId, roomCode]);
+  }, [navigate, playerId, roomCode, setActiveGame, setRoom]);
 
   const currentPlayer = useMemo(
     () => room?.players.find((player) => player.id === playerId),
@@ -175,38 +175,24 @@ export default function CreateRoom() {
         )}
 
         <div className="row mt-4 g-3">
-          <div className="col-md-4">
+          <div className="col-md-6">
             <div className="section-title">Category</div>
             <select
               className="form-select"
               disabled={!isHost}
               onChange={handleSettingChange("category")}
-              value={room?.category || "General"}
+              value={room?.category || "Animal"}
             >
-              <option>General</option>
-              <option>Technology</option>
-              <option>Animals</option>
-              <option>Movies</option>
-              <option>Sports</option>
-              <option>Countries</option>
+              <option>Animal</option>
+              <option>Country</option>
+              <option>Job</option>
+              <option>Movie</option>
+              <option>Artist</option>
+              <option>Music</option>
             </select>
           </div>
 
-          <div className="col-md-4">
-            <div className="section-title">Difficulty</div>
-            <select
-              className="form-select"
-              disabled={!isHost}
-              onChange={handleSettingChange("difficulty")}
-              value={room?.difficulty || "Easy"}
-            >
-              <option>Easy</option>
-              <option>Medium</option>
-              <option>Hard</option>
-            </select>
-          </div>
-
-          <div className="col-md-4">
+          <div className="col-md-6">
             <div className="section-title">Rounds</div>
             <select
               className="form-select"

@@ -4,6 +4,7 @@ import Home from "./views/HomePage/Home";
 import CreateRoom from "./views/CreateRoom/CreateRoom";
 import Gameplay from "./views/Gameplay/Gameplay";
 import BaseLayout from "./layouts/BaseLayout";
+import { useGame } from "./context/GameContext";
 
 function App() {
   return (
@@ -25,8 +26,8 @@ function App() {
 
 function GameNavigationGuard() {
   const location = useLocation();
-  const activeGameRoomCode = sessionStorage.getItem("activeGameRoomCode");
-  const hasSession = Boolean(sessionStorage.getItem("username"));
+  const { activeGameRoomCode, username } = useGame();
+  const hasSession = Boolean(username);
 
   if (
     hasSession &&
