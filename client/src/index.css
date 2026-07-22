@@ -1,0 +1,10 @@
+body {
+  margin: 0;
+
+  font-family: "Poppins", sans-serif;
+
+  background:
+    radial-gradient(circle at top left, #4f46e5 0%, transparent 35%),
+    radial-gradient(circle at bottom right, #2563eb 0%, transparent 35%),
+    #0f172a;
+}

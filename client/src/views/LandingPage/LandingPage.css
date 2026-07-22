@@ -1,3 +1,19 @@
+.landing-page {
+  min-height: 100vh;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  position: relative;
+
+  overflow: hidden;
+
+  color: white;
+}
+
 /* Background Blur */
 
 .blur {
@@ -95,6 +111,23 @@
   margin-bottom: 35px;
 }
 
+.hero-card {
+  max-width: 500px;
+
+  padding: 50px;
+
+  border-radius: 28px;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+}
+
 .hero-card::before {
   content: "";
   position: absolute;
@@ -120,6 +153,16 @@
 }
 
 /* Logo */
+.logo {
+  width: 90px;
+  height: 90px;
+
+  background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+
+  font-size: 38px;
+
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.45);
+}
 
 h1 {
   font-size: 52px;
