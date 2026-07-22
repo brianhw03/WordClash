@@ -15,12 +15,11 @@ const {
 } = require("../store/rooms");
 
 function registerRoomHandler(io, socket) {
-  socket.on("room:create", ({ name, category, difficulty, rounds }, callback) => {
+  socket.on("room:create", ({ name, category, rounds }, callback) => {
     const { room, player } = createRoom({
       name,
       socketId: socket.id,
       category,
-      difficulty,
       rounds,
     });
 

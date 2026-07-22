@@ -37,7 +37,7 @@ async function beginRound(io, code, resetMatch = false) {
   const room = getRoom(code);
   if (!room) return;
 
-  const word = await generateWord(room.category, room.difficulty);
+  const word = await generateWord(room.category, room.usedWords);
   const startedRoom = startRound({ code, word, resetMatch });
   beginTimer(io, code);
   io.to(code).emit("room:updated", serializeRoom(startedRoom));

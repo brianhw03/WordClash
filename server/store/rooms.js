@@ -5,6 +5,7 @@ const gameLogic = require("./gameLogic");
 const MAX_PLAYERS = 2;
 const DEFAULT_LIVES = 6;
 const ROUND_DURATION_SECONDS = 45;
+const VALID_CATEGORIES = ["Animal", "Country", "Job", "Movie", "Artist", "Music"];
 const rooms = {};
 
 function createPlayer(name, socketId) {
@@ -21,7 +22,7 @@ function createPlayer(name, socketId) {
   };
 }
 
-function createRoom({ name, socketId, category, difficulty, rounds = 3 }) {
+function createRoom({ name, socketId, category = "Animal", rounds = 3 }) {
   let code = generateRoomCode();
   while (rooms[code]) code = generateRoomCode();
 
@@ -30,12 +31,12 @@ function createRoom({ name, socketId, category, difficulty, rounds = 3 }) {
     code,
     hostId: host.id,
     status: "waiting",
-    category,
-    difficulty,
+    category: VALID_CATEGORIES.includes(category) ? category : "Animal",
     rounds: Number(rounds),
     currentRound: 0,
     roundEndsAt: null,
     word: null,
+    usedWords: [],
     rematchVotes: {},
     players: { [host.id]: host },
     winner: null,
@@ -97,14 +98,13 @@ function leaveRoom({ code, playerId }) {
   return { room };
 }
 
-function updateRoomSettings({ code, playerId, category, difficulty, rounds }) {
+function updateRoomSettings({ code, playerId, category, rounds }) {
   const room = rooms[code];
   if (!room) return { error: "Room not found" };
   if (room.hostId !== playerId) return { error: "Only the host can change settings" };
   if (room.status !== "waiting") return { error: "Game has already started" };
 
-  if (category) room.category = category;
-  if (difficulty) room.difficulty = difficulty;
+  if (category && VALID_CATEGORIES.includes(category)) room.category = category;
   if (rounds && [1, 3, 5, 7].includes(Number(rounds))) room.rounds = Number(rounds);
   return { room };
 }
@@ -140,6 +140,8 @@ function startRound({ code, word, resetMatch = false }) {
   if (!room) return;
 
   room.word = word.toUpperCase().trim();
+  if (!Array.isArray(room.usedWords)) room.usedWords = [];
+  room.usedWords.push(room.word);
   room.status = "playing";
   room.winner = null;
   room.currentRound += 1;
@@ -207,6 +209,7 @@ function resetMatch(code) {
   room.currentRound = 0;
   room.roundEndsAt = null;
   room.word = null;
+  room.usedWords = [];
   room.winner = null;
   room.rematchVotes = {};
   Object.values(room.players).forEach((player) => {
@@ -243,7 +246,6 @@ function serializeRoom(room) {
     code: room.code,
     status: room.status,
     category: room.category,
-    difficulty: room.difficulty,
     rounds: room.rounds,
     currentRound: room.currentRound,
     targetWins: Math.ceil(room.rounds / 2),

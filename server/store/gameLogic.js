@@ -3,7 +3,10 @@
 function maskWord(word, guessedLetters) {
   return word
     .split("")
-    .map((letter) => (guessedLetters.includes(letter) ? letter : "_"))
+    .map((letter) => {
+      if (!/[A-Z]/.test(letter)) return letter;
+      return guessedLetters.includes(letter) ? letter : "_";
+    })
     .join("");
 }
 
@@ -14,7 +17,10 @@ function isCorrectGuess(word, letter) {
 
 // !Check if all letters of the word have been guessed
 function isWordComplete(word, guessedLetters) {
-  return word.split("").every((letter) => guessedLetters.includes(letter));
+  return word
+    .split("")
+    .filter((letter) => /[A-Z]/.test(letter))
+    .every((letter) => guessedLetters.includes(letter));
 }
 
 function calculateScore(livesLeft) {
