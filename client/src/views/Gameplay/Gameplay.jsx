@@ -203,6 +203,7 @@ export default function Gameplay() {
 
   useEffect(() => {
     const handleKeyDown = (event) => {
+      if (event.target instanceof HTMLInputElement) return;
       const letter = event.key.toUpperCase();
       if (!event.repeat && !lifeExhausted && /^[A-Z]$/.test(letter)) {
         setPressedKey(letter);
@@ -214,6 +215,12 @@ export default function Gameplay() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleGuess, lifeExhausted]);
+
+  const handleMobileGuess = (event) => {
+    const letter = event.target.value.slice(-1).toUpperCase();
+    event.target.value = "";
+    if (/^[A-Z]$/.test(letter)) handleGuess(letter);
+  };
 
   const handleBackHome = () => {
     socket.emit("room:leave", { code: roomCode, playerId }, () => {
@@ -314,6 +321,19 @@ export default function Gameplay() {
               </div>
             ))}
           </div>
+
+          <input
+            className="mobile-guess-input"
+            type="text"
+            inputMode="text"
+            autoCapitalize="characters"
+            autoComplete="off"
+            autoCorrect="off"
+            aria-label="Type a letter"
+            placeholder="Tap here to type a letter"
+            disabled={room?.status !== "playing" || lifeExhausted}
+            onChange={handleMobileGuess}
+          />
 
           <p className="game-status">Guess the word before your opponent!</p>
         </section>
