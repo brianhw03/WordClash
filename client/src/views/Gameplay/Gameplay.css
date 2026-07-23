@@ -356,38 +356,45 @@
     display: none;
   }
   .game-header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
   }
   .game-logo {
-    flex: 1 1 100%;
+    grid-column: 1 / -1;
     justify-content: center;
   }
   .game-logo h2 {
     font-size: 28px;
   }
   .game-meta {
-    order: 2;
-    width: min(100%, 320px);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    justify-self: auto;
-    gap: 8px;
-  }
-  .game-timer {
-    order: 3;
-    justify-self: auto;
+    display: contents;
   }
   .category-box,
+  .round-box,
+  .game-timer {
+    min-height: 78px;
+    padding: 8px 6px;
+    display: grid;
+    place-content: center;
+  }
+  .category-box {
+    grid-column: 1;
+    grid-row: 2;
+  }
   .round-box {
-    padding: 9px 11px;
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .game-timer {
+    grid-column: 3;
+    grid-row: 2;
   }
   .category-box strong {
     font-size: 12px;
   }
-  .round-box strong {
+  .round-box strong,
+  .timer-box strong {
     font-size: 18px;
   }
   .word-box {
@@ -410,8 +417,8 @@
     font-size: 22px;
   }
   .key {
-    flex: 1 1 0;
-    width: auto;
+    flex: 0 0 clamp(24px, 7.8vw, 42px);
+    width: clamp(24px, 7.8vw, 42px);
     min-width: 0;
     height: 44px;
     padding: 0;
@@ -419,7 +426,7 @@
   }
   .keyboard-row {
     width: 100%;
-    gap: 4px;
+    gap: clamp(2px, 0.8vw, 6px);
   }
   .hangman-card {
     padding: 18px 12px;
