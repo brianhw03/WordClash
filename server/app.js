@@ -22,7 +22,7 @@ const corsOptions = {
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: corsOptions.origin,
+    origin: corsOptions.CLIENT_URL,
   },
 });
 
