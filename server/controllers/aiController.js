@@ -80,8 +80,8 @@ const FALLBACK_HINTS = {
   music: "Think of a well-known song title heard by many listeners.",
 };
 
-const RECENT_WORD_LIMIT = 30;
-const RECENT_WORDS_FILE = path.join(__dirname, "../data/recent-words.json");
+const RECENT_WORD_LIMIT = 100;
+const RECENT_WORDS_FILE = process.env.WORD_HISTORY_PATH || path.join(__dirname, "../data/recent-words.json");
 
 function loadRecentWords() {
   try {
@@ -164,20 +164,58 @@ function isValidHint(hint, word) {
     .some((part) => new RegExp(`\\b${part}\\b`, "i").test(cleanHint));
 }
 
-const MOVIE_FOCUSES = [
-  "an animated film",
-  "a science-fiction film",
-  "a comedy film",
-  "a horror film",
-  "a mystery or thriller film",
-  "a romance film",
-  "an action film",
-  "a fantasy film",
-  "a drama film",
-  "a family adventure film",
-  "a film released before 2000",
-  "a film released after 2010",
-];
+const CATEGORY_FOCUSES = {
+  animal: [
+    "a familiar ocean animal",
+    "a familiar bird",
+    "a familiar wild mammal",
+    "a familiar reptile",
+    "a familiar farm animal",
+    "a familiar animal from Africa",
+    "a familiar animal from Asia",
+  ],
+  country: [
+    "a familiar country in Asia",
+    "a familiar country in Europe",
+    "a familiar country in Africa",
+    "a familiar country in North or South America",
+    "a familiar island country",
+  ],
+  job: [
+    "a familiar healthcare profession",
+    "a familiar creative profession",
+    "a familiar public-service profession",
+    "a familiar technology profession",
+    "a familiar outdoor profession",
+  ],
+  movie: [
+    "an animated film",
+    "a science-fiction film",
+    "a comedy film",
+    "a horror film",
+    "a mystery or thriller film",
+    "a romance film",
+    "an action film",
+    "a fantasy film",
+    "a drama film",
+    "a family adventure film",
+    "a film released before 2000",
+    "a film released after 2010",
+  ],
+  artist: [
+    "a globally known singer",
+    "a globally known band",
+    "a globally known actor or actress",
+    "a globally known solo music artist",
+  ],
+  music: [
+    "a famous pop song",
+    "a famous rock song",
+    "a famous song released before 2000",
+    "a famous song released after 2010",
+    "a famous soundtrack song",
+  ],
+};
 
 // Generate the answer and its shared hint in one request to avoid extra game delay.
 async function generateRoundContent(category, excludedWords = []) {
@@ -192,12 +230,8 @@ async function generateRoundContent(category, excludedWords = []) {
     pattern: "^[A-Z](?:[A-Z '\\-]*[A-Z])?$",
   };
   const varietyToken = Math.random().toString(36).slice(2, 10);
-  const movieFocus =
-    MOVIE_FOCUSES[Math.floor(Math.random() * MOVIE_FOCUSES.length)];
-  const categoryFocus =
-    normalizedCategory === "movie"
-      ? `For this request, choose ${movieFocus}; avoid default blockbuster answers unless they match this focus.`
-      : "Choose a different valid answer each time.";
+  const focuses = CATEGORY_FOCUSES[normalizedCategory];
+  const categoryFocus = focuses[Math.floor(Math.random() * focuses.length)];
 
   try {
     for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -218,7 +252,7 @@ async function generateRoundContent(category, excludedWords = []) {
 Category: ${CATEGORY_DETAILS[normalizedCategory]}.
 Choose an answer that is popular, familiar, or currently relevant to a broad audience. Avoid obscure, technical, archaic, or overly niche answers.
 For Movie, Artist, and Music, generate a widely known real answer; never invent or alter a title or name.
-${categoryFocus}
+For this request, choose ${categoryFocus}. Do not default to the most obvious answer unless it matches this focus.
 Rules: the answer may contain multiple words. Keep spaces, apostrophes, and hyphens exactly as written; do not use numbers or other punctuation.
 Examples of valid Music answers: YESTERDAY, WONDERWALL, BILLIE JEAN.
 Do not use any of these answers that were recently used: ${[...excluded].join(", ") || "none"}.
