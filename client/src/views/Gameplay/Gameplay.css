@@ -357,10 +357,13 @@
     gap: 10px;
   }
   .scoreboard {
-    margin-bottom: 24px;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
   }
   .vs {
-    display: none;
+    display: block;
+    font-size: 18px;
   }
   .game-header {
     display: grid;
@@ -449,8 +452,8 @@
     font-size: 13px;
   }
   .game-player {
-    min-height: 82px;
-    padding: 12px;
+    min-height: 70px;
+    padding: 10px;
   }
   .player-name {
     overflow: hidden;
@@ -459,8 +462,8 @@
     font-size: 15px;
   }
   .player-score {
-    margin-top: 5px;
-    font-size: 20px;
+    margin-top: 3px;
+    font-size: 18px;
   }
   .hangman-stage {
     width: min(100%, 132px);
