@@ -158,7 +158,13 @@ function registerRoomHandler(io, socket) {
     if (result.error) return callback(result);
 
     socket.leave(code);
-    callback({ success: true });
+    if (result.roomDeleted) {
+      clearRoundTimer(code);
+      callback({ success: true, roomDeleted: true });
+      return;
+    }
+
+    callback({ success: true, hostTransferredTo: result.hostTransferredTo });
     io.to(code).emit("room:updated", serializeRoom(result.room));
 
     if (result.room.status === "finished") {

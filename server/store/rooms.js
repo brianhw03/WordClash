@@ -92,6 +92,22 @@ function leaveRoom({ code, playerId }) {
   const player = room.players[playerId];
   if (!player) return { error: "Player not found" };
 
+  const connectedOtherPlayers = Object.values(room.players).filter(
+    (candidate) => candidate.id !== playerId && candidate.connected,
+  );
+
+  if (room.hostId === playerId) {
+    if (!connectedOtherPlayers.length) {
+      delete rooms[code];
+      return { roomDeleted: true };
+    }
+
+    const nextHost = connectedOtherPlayers[0];
+    delete room.players[playerId];
+    room.hostId = nextHost.id;
+    return { room, hostTransferredTo: nextHost.id };
+  }
+
   player.connected = false;
   player.ready = false;
   return { room };
