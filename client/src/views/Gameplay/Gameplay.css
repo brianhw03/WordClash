@@ -361,8 +361,15 @@
   .game-meta {
     gap: 6px;
   }
-  .category-box {
-    display: none;
+  .category-box,
+  .round-box {
+    padding: 9px 11px;
+  }
+  .category-box strong {
+    font-size: 12px;
+  }
+  .round-box strong {
+    font-size: 18px;
   }
   .word-box {
     width: 48px;
